@@ -1,20 +1,17 @@
 ; List all pci devices
 include ../libs/mylib.inc
-stack segment para stack 'STACK'
-    dw 128h dup(0)
-stack ends
-dseg segment 'DATA'
+    .model small
+    .stack 128h
+    .data
     count1 db ?        ;Bus NO.
     count2 db ?        ;Func NO.
     count3 db ?        ;Dev NO.
     str0 db 'PCI BIOS do not exists.$'
     str1 db 'BusNo   DevNo   FuncNo  VendorID  DeviceID', 0dh, 0ah, '*********************************************', 0dh, 0ah, '$'
     str2 db '      $'
-    dseg ends
-cseg segment 'CODE'
-assume cs:cseg,ss:stack,ds:dseg
+    .code
 start:
-    mov ax, dseg
+    mov ax, @data
     mov ds, ax      ; 赋值 DS
     mov ah,0b1h
     mov al,01h
@@ -112,6 +109,5 @@ cont2:
 mout:
     mov ah,4ch	; 循环结束退出
     int 21h
-cseg ends
 end start
 
