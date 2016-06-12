@@ -6,6 +6,6 @@ else
 	wlink format dos option map name $(PROG).exe file $(PROG).obj file ../libs/mylib.lib
 endif
 emu:
-	qemu-system-i386 ../../dos.cow -hdb fat:.
+	qemu-system-i386 ../../dos.cow -hdb fat:. -device edu
 clean:
 	rm *.exe *.obj *.err *.map -f
