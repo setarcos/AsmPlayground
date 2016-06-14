@@ -1,11 +1,23 @@
+ifneq "$(FLAT)" ""
+$(PROG).bin: $(PROG).asm
+	jwasm -bin -Fo $(PROG).bin $(PROG).asm
+emu:
+	qemu-system-x86_64 -drive file=bl.bin,format=raw
+else
 $(PROG).exe: $(PROG).asm
 ifeq "$(USELIB)" ""
 	jwasm -mz -Fo $(PROG).exe $(PROG).asm
 else
 	jwasm -Fo $(PROG).obj $(PROG).asm
 	wlink format dos option map name $(PROG).exe file $(PROG).obj file ../libs/mylib.lib
-endif
+endif # USELIB
 emu:
-	qemu-system-i386 ../../dos.cow -hdb fat:. -device edu
+	qemu-system-x86_64 ../../dos.cow -hdb fat:. -device edu
+endif # FLAT
+$(PROG).obj:
+	jwasm -omf -Zi -Fo $(PROG).obj $(PROG).asm
+$(PROG).lst: $(PROG).obj
+	wdis $(PROG).obj -l=$(PROG).lst
+list: $(PROG).lst
 clean:
-	rm *.exe *.obj *.err *.map -f
+	rm *.exe *.obj *.err *.map *.lst *.bin -f
