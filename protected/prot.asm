@@ -6,10 +6,10 @@ start:
     xor ax, ax
     mov ss, ax      ; SS
     mov sp, 7c00h
-    
+
     mov ax, 0b800h  ; ES
     mov es, ax
-    
+
     cld
     xor di, di
     mov cx, 25 * 80
@@ -35,18 +35,18 @@ gdt_size label fword
     dw 39
 gdt_base    dd offset gdt+7c00h
     align 8
-gdt dq 0    ; Null discriptor
+gdt dq 0    ; Null descriptor
     dd 7c0001ffh, 00409800h ; GDT[1], CS
     dd 8000ffffh, 0040920bh ; GDT[2], ES
     dd 7c0001ffh, 00409200h ; GDT[3], DS
     dd 00007a00h, 00409600h ; GDT[4], SS
-org 0ffh
-    db 00
+    align 16
+end16 equ  $
 _TEXT16 ENDS
 
 _TEXT32 segment para flat public 'CODE'
     assume ds:FLAT, es:FLAT
-org 100h
+org end16
 flush:
     mov cx, 10h
     mov es, ecx
@@ -60,7 +60,7 @@ next:
     movsb          ; copy to frame buffer
     inc di         ; ignore the attribute part
     loop next
-    hlt 
+    hlt
 
 msg db "Hello, Protected World!"
 msg_end db 0
