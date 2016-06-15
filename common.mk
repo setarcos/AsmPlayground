@@ -2,7 +2,7 @@ ifneq "$(FLAT)" ""
 $(PROG).bin: $(PROG).asm
 	jwasm -bin -Fo $(PROG).bin $(PROG).asm
 emu:
-	qemu-system-x86_64 -drive file=bl.bin,format=raw
+	qemu-system-x86_64 -drive file=$(PROG).bin,format=raw
 else
 $(PROG).exe: $(PROG).asm
 ifeq "$(USELIB)" ""
@@ -14,7 +14,7 @@ endif # USELIB
 emu:
 	qemu-system-x86_64 ../../dos.cow -hdb fat:. -device edu
 endif # FLAT
-$(PROG).obj:
+$(PROG).obj: $(PROG).asm
 	jwasm -omf -Zi -Fo $(PROG).obj $(PROG).asm
 $(PROG).lst: $(PROG).obj
 	wdis $(PROG).obj -l=$(PROG).lst
