@@ -1,10 +1,13 @@
 ; Show PCI configration space of pci-edu in qemu
     .model small
+    .386
     .stack 1024
 
     .data
 pciid     dd 11e81234h
 noedu   db 'pci-edu not installed, use -device edu.', 0ah, 0dh, '$'
+barinfo db 'Mem address:$'
+intinfo db 'Interrupt line:$'
     .code
 start:
     mov ax, @data
@@ -13,7 +16,6 @@ start:
 lop:
     cmp bx, 3ffh
     jg not_found
-    .386
     mov cx, 0
     call conf_in  ; read vendor id and device id
     cmp eax, pciid
@@ -47,6 +49,36 @@ found:
     add cx, 4
     cmp cx, 3Fh
     jb found
+    lea dx, barinfo
+    mov ah, 09
+    int 21h
+    mov cx, 0ch
+bar:
+    call conf_in
+    cmp eax, 0
+    jz @F           ; don't display zeros
+    push cx
+    mov cx, 4
+    push eax
+    shr eax, 16
+    call disp_ax    ; disp bar address(high)
+    mov cx, 4
+    pop eax
+    call disp_ax    ; disp bar address(low)
+    call crlf
+    pop cx
+@@:
+    add cx, 4
+    cmp cx, 28h
+    jb bar
+    lea dx, intinfo
+    mov ah, 09h
+    int 21h
+    mov cx, 3ch
+    call conf_in
+    mov cx, 2
+    call disp_ax
+    call crlf
     jmp mout
 not_found:
     lea dx, noedu
@@ -56,6 +88,9 @@ mout:
     mov ax, 4c00h
     int 21h
 
+; bx: bus,dev,func combined
+; cx: pci configuration address
+; return value at eax
 conf_in proc near
     push dx
     mov ax, bx
@@ -69,6 +104,19 @@ conf_in proc near
     pop dx
     ret
 conf_in endp
+
+crlf proc near
+    push ax
+    push dx
+    mov ah, 02h
+    mov dl, 0ah
+    int 21h
+    mov dl, 0dh
+    int 21h
+    pop dx
+    pop ax
+    ret
+crlf endp
 
 disp_ax proc near
     push dx
@@ -103,7 +151,7 @@ disp_al  proc near
     adc al,40h ; Al is from 0D0h to 0D9h or 41h to 46h.
     daa        ; Al is from 30h to 39h ("0" to "9") or 41h to 46h ("A" to "F").
     mov dl, al
-    mov ah,02h
+    mov ah, 02h
     int 21h
     pop bx
     pop dx
