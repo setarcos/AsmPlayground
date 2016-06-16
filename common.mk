@@ -2,7 +2,7 @@ ifneq "$(FLAT)" ""
 $(PROG).bin: $(PROG).asm
 	jwasm -bin -Fo $(PROG).bin $(PROG).asm
 emu:
-	qemu-system-x86_64 -drive file=$(PROG).bin,format=raw
+	qemu-system-x86_64 -drive file=$(PROG).bin,format=raw $(QEMUFLAG)
 else
 $(PROG).exe: $(PROG).asm
 ifeq "$(USELIB)" ""
@@ -12,7 +12,7 @@ else
 	wlink format dos option map name $(PROG).exe file $(PROG).obj file ../libs/mylib.lib
 endif # USELIB
 emu:
-	qemu-system-x86_64 ../../dos.cow -hdb fat:. -device edu
+	qemu-system-x86_64 ../../dos.cow -hdb fat:. $(QEMUFLAG)
 endif # FLAT
 $(PROG).obj: $(PROG).asm
 	jwasm -omf -Zi -Fo $(PROG).obj $(PROG).asm
