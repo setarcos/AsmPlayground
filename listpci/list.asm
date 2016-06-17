@@ -39,12 +39,13 @@ lop:mov ah,count2    ;取得对应于Bus NO.、Function NO. DevNO.的VendorID、DeviceID
     mov bh,count1	; BH: 总线号
     mov di,0		; 偏移地址为0
     int 1ah		; 读取配置空间字
-    jc kk3		; CF置位表示出错
-    jmp kk4		; 无错
-kk3:jmp cont
-kk4:cmp cx, 0ffffh	; 比较cx是否为FFFF
-    jz cont1		; 是FFFF表示没有查找到设备
-    mov  al,count1 ; 显示配置信息
+    jc mout		; CF置位表示出错
+    cmp cx, 0ffffh	; 比较cx是否为FFFF
+    jnz @F		; 是FFFF表示没有查找到设备
+    cmp count2, 0
+    jz cont1    ; 功能号 0 的时候直接跳下一个设备
+    jmp cont    ; 否则检查下一个功能
+@@: mov  al,count1 ; 显示配置信息
     mov cx, 2
     call disp_ax	; 显示总线号
     mov dx,offset str2	

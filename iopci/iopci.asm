@@ -35,15 +35,18 @@ lop:
     mov dx, 0cfch
     in eax, dx
     cmp eax, 0ffffffffh
+    jnz @F
+    cmp func, 0
     jz cont1
-    mov id, eax
-    mov al,bus
+    jmp cont
+@@: mov id, eax
+    mov al, bus
     mov cx, 2
     call disp_ax
-    mov dx,offset space
+    mov dx, offset space
     mov ah, 9
     int 21h
-    mov al,dev
+    mov al, dev
     mov cx, 2
     call disp_ax
     mov dx, offset space
@@ -52,22 +55,22 @@ lop:
     mov al, func
     mov cx, 2
     call disp_ax
-    mov dx,offset space
+    mov dx, offset space
     mov ah,9
     int 21h
     mov cx, 4
     mov eax, id
     call disp_ax
-    mov dx,offset space
+    mov dx, offset space
     mov ah, 9
     int 21h
     shr eax, 16
     mov cx,4
     call disp_ax
     mov ah,02
-    mov dl,0dh
+    mov dl, 0dh
     int 21h
-    mov dl,0ah
+    mov dl, 0ah
     int 21h
     mov cl, func
     cmp cl, 0
