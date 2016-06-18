@@ -39,11 +39,11 @@ pm_mem    proc
     movzx edx, dx
     add eax, edx               ; eax=base for GDT
     push eax
-    push 20h
+    push 31                    ; GDT size 4 * 8 - 1
     movzx eax, sp        
-    cli                       ; make sure no ISR will interfere now
-    lgdt fword ptr ss:[eax]   ; LGDT is necessary before switch to PM
-    add sp, 6
+    cli                        ; make sure no ISR will interfere now (no sti?)
+    lgdt fword ptr ss:[eax]    ; LGDT is necessary before switch to PM
+    add sp, 6                  ; clear 6 bytes from stack
     mov eax, cr0
     or al, 1
     mov cr0, eax         ; sets Protected Mode
@@ -57,8 +57,8 @@ pm_in:
     mov [ebx], ecx
 pm_get:
     mov ecx, [ebx]
-    mov dl, 18h
-    mov ds, dx           ; load 64kB segment descriptor from GDT into DS
+   ; mov dl, 18h         ; don't know why (?)
+   ; mov ds, dx          ; load 64kB segment descriptor from GDT into DS
     and al, not 1
     mov cr0, eax         ; sets Real Mode
     db 0eah              ; far jump to restore CS & clear prefetch queue
@@ -167,7 +167,10 @@ error:
 
 cpuok:
     xor cx, cx        ; peek a byte
-    mov ebx, 0fea00000h ; pci-edu mem, should return 010000ed
+    mov ebx, 0fea00004h ; pci-edu mem, should invert what was writen
+    mov ecx, 1234abcdh
+    call pm_mem
+    xor cx, cx
     call pm_mem
     mov ebx, ecx
     mov cx, 8
