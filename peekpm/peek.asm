@@ -2,14 +2,16 @@
 ;    Example program switching to Protected and back to Real Mode
 ;    Jerzy Tarasiuk                    8-Jun-1995
 ;    Revised by Setarcos               18-Jun-2016
-    .model small
     .386p
 
-    .stack 512
-    .code
+    stack segment para stack 'STACK'
+        dw 200h dup(0)
+    stack ends
+    data segment use16
 ;-
 ;    GDT to be used in Protected Mode
 ;
+    align 8
 mygdt   dq    0                     ; null descriptor
 gdtcd   dw    -1, 0, 9A00h, 0       ; 64kB code segment, base to be set
         dw    -1, 0, 9200h, 008Fh   ; 4GB R/W segment, base=0
@@ -17,6 +19,10 @@ gdtcd   dw    -1, 0, 9A00h, 0       ; 64kB code segment, base to be set
 badcpum db    "Not 80386+ CPU!", 0Dh, 0Ah, '$'
 inpmerm db    "Already in Protected Mode!", 0Dh, 0Ah, '$'
 bada20m db    "Address line A20 disabled!", 0Dh, 0Ah, '$'
+    data ends
+
+    code segment use16 'CODE'
+        assume cs:code, ss:stack, ds:data
 
 ;---
 ;    pm_mem    - access memory (peek/poke a byte) in Protected Mode
@@ -37,6 +43,9 @@ pm_mem    proc
     mov byte ptr gdtcd[5], 9Ah ; set segment attribute
     mov dx, offset mygdt
     movzx edx, dx
+    mov ax, ds
+    movzx eax, ax
+    shl eax, 4                 ; eax=base for ds
     add eax, edx               ; eax=base for GDT
     push eax
     push 31                    ; GDT size 4 * 8 - 1
@@ -146,6 +155,8 @@ disp_al endp
 ;    - exit (status = byte obtatained)
 ;
 start:
+    mov ax, data
+    mov ds, ax
     in al, 92h
     or al, 02h
     out 92h, al      ; enable a20
@@ -183,6 +194,6 @@ exit:
     mov ah, 4ch       ; exit
     mov al, cl        ; status = the byte
     int 21h
-
+    code ends
 end start
 
