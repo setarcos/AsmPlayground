@@ -17,7 +17,7 @@ start:
     mov ax, seg irq
     mov word ptr es:[bx + 2], ax
     sti
-    mov cx, 0
+    mov cx, 18
 wait5s:
     cmp cs:count, cx
     jb wait5s
@@ -25,7 +25,7 @@ wait5s:
     mov ah, 09h
     int 21h         ; display a message
     add cx, 18
-    cmp cx, 90
+    cmp cx, 91
     jb wait5s
     cli
     mov ax, word ptr oldirq     ; restore old vector
