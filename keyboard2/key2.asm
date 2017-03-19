@@ -4,7 +4,12 @@
 start:
     mov ax, @code
     mov ds, ax
-@@: in al, 60h
+@@: mov ah, 1
+    int 16h
+    jz goon
+    mov ah, 7
+    int 21h
+goon: in al, 60h
     cmp al, buf
     jz @B
     mov buf, al
