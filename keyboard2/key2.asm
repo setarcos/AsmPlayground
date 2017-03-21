@@ -4,12 +4,7 @@
 start:
     mov ax, @code
     mov ds, ax
-@@: mov ah, 1
-    int 16h
-    jz goon
-    mov ah, 7
-    int 21h
-goon: in al, 60h
+@@: in al, 60h
     cmp al, buf
     jz @B
     mov buf, al
@@ -23,7 +18,13 @@ goon: in al, 60h
     call disp_al
     cmp buf, 1
     jnz @B
-    mov ax, 4c00h
+@@: mov ah, 1
+    int 16h
+    jz @F
+    mov ah, 1
+    int 21h
+    jmp @B
+@@: mov ax, 4c00h
     int 21h         ; return to dos
 
 buf db 0
