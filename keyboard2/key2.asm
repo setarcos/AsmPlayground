@@ -4,9 +4,11 @@
 start:
     mov ax, @code
     mov ds, ax
-@@: in al, 60h
-    cmp al, buf
+    cli
+@@: in al, 64h
+    test al, 01h
     jz @B
+    in al, 60h
     mov buf, al
     push ax
     shr ax, 1
@@ -24,6 +26,7 @@ start:
     mov ah, 1
     int 21h
     jmp @B
+    sti
 @@: mov ax, 4c00h
     int 21h         ; return to dos
 
