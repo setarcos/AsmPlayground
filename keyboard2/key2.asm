@@ -4,7 +4,9 @@
 start:
     mov ax, @code
     mov ds, ax
-    cli
+    in al, 21h
+    or al, 02h    ; keyboard uses IRQ1
+    out 21h, al
 @@: in al, 64h
     test al, 01h
     jz @B
@@ -20,14 +22,10 @@ start:
     call disp_al
     cmp buf, 1
     jnz @B
-@@: mov ah, 1
-    int 16h
-    jz @F
-    mov ah, 1
-    int 21h
-    jmp @B
-    sti
-@@: mov ax, 4c00h
+    in al, 21h
+    and al, 11111101b
+    out 21h, al
+    mov ax, 4c00h
     int 21h         ; return to dos
 
 buf db 0
