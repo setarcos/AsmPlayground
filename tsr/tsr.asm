@@ -31,8 +31,11 @@ no_found:
 pass_on:
     jmp cs:oldirq   ; jump to oldirq, which will 'iret' back
 irq endp
-oldirq dd ?        ; old int8 vector
-msg db "TSR already installed!", 0ah, 0dh, '$'
+oldirq dd ?        ; old INT1A vector
+msg db "TSR already installed!", 0ah, 0dh
+msg1 db "Are you want to uninstall?(y/n)", '$'
+msg2 db 0ah, 0dh, "TSR memory free failed!", 0ah, 0dh, '$'
+msg3 db 0ah, 0dh, "TSR uninstalled!", 0ah, 0dh, '$'
 
 start:
     mov ax, @code
@@ -59,9 +62,46 @@ start:
     mov ax, 3100h
     int 21h
 ex:
+    push ax
     lea dx, msg
     mov ah, 09h
     int 21h
+    mov ah, 01h
+    int 21h
+    cmp al, 'y'
+    jnz keep
+    pop ax
+    mov es, ax  ; SEG of the resident code
+    mov cx, word ptr es:[oldirq + 2] ; SEG of the old vector
+    mov dx, word ptr es:[oldirq]     ; OFF of the old vector
+    mov ax, 0
+    push ds
+    mov ds, ax
+    cli
+    mov [bx], dx
+    mov [bx + 2], cx
+    sti
+    pop ds
+    mov ax, es
+    sub ax, 10h
+    mov es, ax
+    mov ah, 49h
+    int 21h     ; free the program memory
+    mov ax, es
+    sub ax, 0Dh
+    mov es, ax
+    mov ah, 49h
+    int 21h     ; free the enviorment memory
+    jnc @F
+    lea dx, msg2
+    mov ah, 09h
+    int 21h
+    jmp keep
+@@:
+    lea dx, msg3
+    mov ah, 09h
+    int 21h
+keep:
     mov ax, 4c00h
     int 21h         ; return to dos
 
