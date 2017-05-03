@@ -84,14 +84,15 @@ ex:
     pop ds
     mov ax, es
     sub ax, 10h
-    mov es, ax
-    mov ah, 49h
-    int 21h     ; free the program memory
-    mov ax, es
-    sub ax, 0Dh
+    mov es, ax      ; PSP
+    push es
+    mov ax, es:[2ch] ; address of the enviorment
     mov es, ax
     mov ah, 49h
     int 21h     ; free the enviorment memory
+    pop es
+    mov ah, 49h
+    int 21h     ; free the program memory
     jnc @F
     lea dx, msg2
     mov ah, 09h

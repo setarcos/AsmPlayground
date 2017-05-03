@@ -132,7 +132,7 @@ start:
     lea dx, msg;
     mov cl, 4
     shr dx, cl
-    add dx, 11h         ; add 1 for remainder and 10 for PSP 
+    add dx, 11h         ; add 1 for remainder and 10 for PSP
     mov ax, 3100h
     int 21h             ; resident and exit
 tsr_ready:
@@ -187,7 +187,7 @@ init8250 proc near
     in al, dx
     or al, 80h
     out dx, al          ; enable DLAB(Divisor Latch Access Bit)
-    mov dx, BASE        ; 1200bps 
+    mov dx, BASE        ; 1200bps
     mov al, 60h
     out dx, al
     inc dx
@@ -233,12 +233,13 @@ remove_tsr proc near
     mov ax, tsrseg
     sub ax, 10h         ; the PSP
     mov es, ax
+    push es
+    mov ax, es:[2ch]    ; segment of the environment
+    mov es, ax
     mov ah, 49h
-    int 21h             ; free the program
-    mov ax, es
-    sub ax, 0dh         ; this might not portable
-    mov es, ax          ; just work on my machine
-    mov ah, 49h         ; free the environment
+    int 21h             ; free the environment
+    pop es
+    mov ah, 49h         ; free the program
     int 21h
     ret
 remove_tsr endp
