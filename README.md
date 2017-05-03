@@ -1,9 +1,10 @@
-Assambly Language Playground
+Assembly Language Playground
 ==========
-These just some random programs writen in assambly language.
+These just some random programs written in assembly language.
 
 Tools used
 -----------
 * JWasm
+* Nasm
 * QEMU
-
+* FreeDos
