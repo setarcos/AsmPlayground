@@ -10,7 +10,6 @@
     LSR     equ  05h
     MSR     equ  06h
 irq0c proc far
-    pushf
     push eax
     push bx
     push cx
@@ -96,7 +95,6 @@ eoi:
     pop cx
     pop bx
     pop eax
-    popf
     iret
 irq0c endp
 oldirq0c dd ?           ; old INT 0C vector
@@ -145,9 +143,9 @@ tsr_ready:
     int 21h
     cmp al, 'y'
     jnz keep
+    call shut8250
     call remove_tsr
     jnc @F
-    call shut8250
     lea dx, msg2
     mov ah, 09h
     int 21h
